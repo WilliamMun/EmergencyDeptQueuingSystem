@@ -4,11 +4,9 @@ jitcontrol off;
 disp('--- EmergencyDeptQueuingSystem (Phase 1) ---');
 disp(' ');
 
-% 1. ????: ?????????????? (N)
 N = input('Please enter the total patient : ');
 maxRange = 7;
 
-% ????????
 while isempty(N) || N <= 0
     disp('Error: Number of patient must more than 0!');
     N = input('Please Re-enter the total patient! : ');

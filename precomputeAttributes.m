@@ -8,6 +8,7 @@ function patient_table = precomputeAttributes(N, maxRange, random_sequence, rang
     rn_return = floor(random_matrix(4, :) * maxRange) + 1; 
     rn_retTime = floor(random_matrix(5, :) * maxRange) + 1; 
     rn_service2 = floor(random_matrix(6, :) * maxRange) + 1; % new random number for returning patients
+    green_assigned = zeros(1, N); % memory array to track which green doctor they saw
     
     rn_arrival(1) = -1; % standard first patient arrival as -1
     
@@ -47,6 +48,7 @@ function patient_table = precomputeAttributes(N, maxRange, random_sequence, rang
                     break; 
                 end 
             end 
+            
         elseif zone_idx == 2 % yellow 
             for i = 1:length(values_serviceYellow) 
                 if curr_service_rn >= ranges_serviceYellow(i, 1) && curr_service_rn <= ranges_serviceYellow(i, 2) 
@@ -54,9 +56,12 @@ function patient_table = precomputeAttributes(N, maxRange, random_sequence, rang
                     break; 
                 end 
             end 
+            
         elseif zone_idx == 3 % green 
             % phase 2 calculates green service times only, then phase 3 will decied which counter the patient will go based on availability
             green_counter_choice = floor(random_matrix(3, p) * 3) + 1; 
+            green_assigned(p) = green_counter_choice; % save the specific doctor to memory
+            
             if green_counter_choice == 1 
                 for i = 1:length(values_serviceGreen1) 
                     if curr_service_rn >= ranges_serviceGreen1(i, 1) && curr_service_rn <= ranges_serviceGreen1(i, 2) 
@@ -106,13 +111,63 @@ function patient_table = precomputeAttributes(N, maxRange, random_sequence, rang
             rn_service2(p) = -1;
             second_service_times(p) = 0;
         else 
-            second_service_times(p) = 5 + floor((rn_service2(p) / maxRange) * 10); %logic for 5-15 review time using the sixth random number (CHECK CHECK)
+            
+            % the original counter tables for the 2nd visit 
+            curr_rn = rn_service2(p); 
+            srv2_time = 0; 
+            
+            if triage_zones_numeric(p) == 1 % Route through Red Zone Table 
+                for i = 1:length(values_serviceRed) 
+                    if curr_rn >= ranges_serviceRed(i, 1) && curr_rn <= ranges_serviceRed(i, 2) 
+                        srv2_time = values_serviceRed(i); 
+                        break; 
+                    end 
+                end
+                
+            elseif triage_zones_numeric(p) == 2 % Route through Yellow Zone Table 
+                for i = 1:length(values_serviceYellow) 
+                    if curr_rn >= ranges_serviceYellow(i, 1) && curr_rn <= ranges_serviceYellow(i, 2) 
+                        srv2_time = values_serviceYellow(i); 
+                        break; 
+                    end 
+                end 
+            
+            elseif triage_zones_numeric(p) == 3 % Route through Green Zone Table 
+                % recall which green table they used for service 1
+                if green_assigned(p) == 1
+                    for i = 1:length(values_serviceGreen1) 
+                        if curr_rn >= ranges_serviceGreen1(i, 1) && curr_rn <= ranges_serviceGreen1(i, 2) 
+                            srv2_time = values_serviceGreen1(i); 
+                            break;
+                        end
+                    end
+                    
+                elseif green_assigned(p) == 2
+                    for i = 1:length(values_serviceGreen2) 
+                        if curr_rn >= ranges_serviceGreen2(i, 1) && curr_rn <= ranges_serviceGreen2(i, 2) 
+                            srv2_time = values_serviceGreen2(i); 
+                            break; 
+                        end
+                    end
+                else
+                    for i = 1:length(values_serviceGreen3) 
+                        if curr_rn >= ranges_serviceGreen3(i, 1) && curr_rn <= ranges_serviceGreen3(i, 2) 
+                            srv2_time = values_serviceGreen3(i); 
+                            break;
+                        end
+                    end
+                end
+            end
+            
+            second_service_times(p) = srv2_time;
+        end
+    end
             
     % print pre-computation summary table  
     disp('================================================================================================================='); 
     disp('Generated Patient Attributes Master Pre-Computation Array Matrix'); 
     disp('================================================================================================================='); 
-    fprintf('|Pat ID|Arr Time |Triage Zone|Ser Time|Will Return?|Return Delay Time|\n'); 
+    fprintf('|Pat ID|Arr Time |Triage Zone|Ser Time|Will Return?|Return Delay Time|2nd Ser Time|\n'); 
     disp('-----------------------------------------------------------------------------------------------------------------'); 
     
     % temporary holders for output strings
@@ -135,7 +190,7 @@ function patient_table = precomputeAttributes(N, maxRange, random_sequence, rang
             return_decisions{p} = 'No'; 
         end
     
-        fprintf('|%-5d | %-8.2f| %-10s| %-7g| %-11s| %-16g|\n', p, arrival_times(p), triage_zones{p}, pre_service_times(p), return_decisions{p}, return_delay_times(p));
+        fprintf('|%-5d | %-8.2f| %-10s| %-7g| %-11s| %-16g| %-11g|\n', p, arrival_times(p), triage_zones{p}, pre_service_times(p), return_decisions{p}, return_delay_times(p), second_service_times(p));
     end 
     disp('================================================================================================================='); 
     disp(' '); 

@@ -4,11 +4,9 @@ jitcontrol off;
 disp('--- EmergencyDeptQueuingSystem (Phase 1) ---');
 disp(' ');
 
-% 1. ????: ?????????????? (N)
 N = input('Please enter the total patient : ');
 maxRange = 7;
 
-% ????????
 while isempty(N) || N <= 0
     disp('Error: Number of patient must more than 0!');
     N = input('Please Re-enter the total patient! : ');
@@ -128,7 +126,7 @@ prob_return = generateRandomProbabilities(2);
 disp(' ');
 
 %return delay time table
-values_retTime = [5, 10, 15, 20, 25]
+values_retTime = [5, 10, 15, 20, 25];
 prob_retTime = generateRandomProbabilities(5);
 [cdf_retTime, ranges_retTime] = printSimulationTable('Table 9: Return Delay Time (minutes)', 'Time', values_retTime, prob_retTime, maxRange);
 disp(' ');

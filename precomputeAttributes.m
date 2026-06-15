@@ -1,25 +1,31 @@
 function patient_table = precomputeAttributes(N, maxRange, random_sequence, ranges_arrival, values_arrival, ranges_triage, values_triage, ranges_serviceRed, values_serviceRed, ranges_serviceYellow, values_serviceYellow, ranges_serviceGreen1, values_serviceGreen1, ranges_serviceGreen2, values_serviceGreen2, ranges_serviceGreen3, values_serviceGreen3, ranges_return, values_return, ranges_retTime, values_retTime) 
     jitcontrol off;
-    random_matrix = reshape(random_sequence, 5, N); 
+    random_matrix = reshape(random_sequence, 6, N); %added 6 rows, one more random number for the second service if they go xray
     % scale random elements 
     rn_arrival = floor(random_matrix(1, :) * maxRange) + 1; 
     rn_triage = floor(random_matrix(2, :) * maxRange) + 1; 
     rn_service = floor(random_matrix(3, :) * maxRange) + 1; 
     rn_return = floor(random_matrix(4, :) * maxRange) + 1; 
     rn_retTime = floor(random_matrix(5, :) * maxRange) + 1; 
-    rn_arrival(1) = 0; 
+    rn_service2 = floor(random_matrix(6, :) * maxRange) + 1; % new random number for returning patients
+    
+    rn_arrival(1) = -1; % standard first patient arrival as -1
+    
     % memory allocation 
     interarrival_times = zeros(1, N); 
-    triage_zones_numeric = zeros(1, N); 
+    triage_zones_numeric = zeros(1, N); % 1= red, 2 = yellow, 3 = green
     pre_service_times = zeros(1, N); 
-    return_decisions_numeric = zeros(1, N); 
+    return_decisions_numeric = zeros(1, N); % 1 = yes, 0 = no
     return_delay_times = zeros(1, N); 
+    second_service_times = zeros(1, N); % array for X-ray review times
+    
     % map interarrival times  
     for i = 1:length(values_arrival) 
         interarrival_times(rn_arrival >= ranges_arrival(i, 1) & rn_arrival <= ranges_arrival(i, 2)) = values_arrival(i); 
     end 
     interarrival_times(1) = 0; 
     arrival_times = cumsum(interarrival_times); 
+    
     % map triage zone and zone specific service time 
     for p = 1:N 
         curr_triage_rn = rn_triage(p); 
@@ -30,9 +36,10 @@ function patient_table = precomputeAttributes(N, maxRange, random_sequence, rang
                 break; 
             end 
         end 
+        
         curr_service_rn = rn_service(p); 
         srv_time = 0; 
-        display_zone_numeric = zone_idx; 
+        
         if zone_idx == 1 % red 
             for i = 1:length(values_serviceRed) 
                 if curr_service_rn >= ranges_serviceRed(i, 1) && curr_service_rn <= ranges_serviceRed(i, 2) 
@@ -48,9 +55,9 @@ function patient_table = precomputeAttributes(N, maxRange, random_sequence, rang
                 end 
             end 
         elseif zone_idx == 3 % green 
+            % phase 2 calculates green service times only, then phase 3 will decied which counter the patient will go based on availability
             green_counter_choice = floor(random_matrix(3, p) * 3) + 1; 
             if green_counter_choice == 1 
-                display_zone_numeric = 3; % green (C1) 
                 for i = 1:length(values_serviceGreen1) 
                     if curr_service_rn >= ranges_serviceGreen1(i, 1) && curr_service_rn <= ranges_serviceGreen1(i, 2) 
                         srv_time = values_serviceGreen1(i);
@@ -58,14 +65,13 @@ function patient_table = precomputeAttributes(N, maxRange, random_sequence, rang
                     end 
                 end 
             elseif green_counter_choice == 2 
-                display_zone_numeric = 4; % green (C2) 
                 for i = 1:length(values_serviceGreen2) 
                     if curr_service_rn >= ranges_serviceGreen2(i, 1) && curr_service_rn <= ranges_serviceGreen2(i, 2) 
                         srv_time = values_serviceGreen2(i); 
                         break; 
                     end 
                 end 
-            else display_zone_numeric = 5; % green (C3) 
+            else 
                 for i = 1:length(values_serviceGreen3) 
                     if curr_service_rn >= ranges_serviceGreen3(i, 1) && curr_service_rn <= ranges_serviceGreen3(i, 2) 
                         srv_time = values_serviceGreen3(i); 
@@ -74,29 +80,41 @@ function patient_table = precomputeAttributes(N, maxRange, random_sequence, rang
                 end 
             end 
         end 
-        triage_zones_numeric(p) = display_zone_numeric; 
+        triage_zones_numeric(p) = zone_idx; % store strictly as 1, 2 or 3  
         pre_service_times(p) = srv_time; 
     end 
-    % map return decisions numerically (1 = yes, 2 = no) 
+    
+    % map return decisions numerically (1 = yes, 0 = no) 
     for i = 1:length(values_return) 
-        return_decisions_numeric(rn_return >= ranges_return(i, 1) & rn_return <= ranges_return(i, 2)) = i; 
-    end 
-    % map return delay times 
+        if strcmp(values_return{i}, 'Yes')
+            return_decisions_numeric(rn_return >= ranges_return(i, 1) & rn_return <= ranges_return(i, 2)) = 1;
+        else 
+            return_decisions_numeric(rn_return >= ranges_return(i, 1) & rn_return <= ranges_return(i, 2)) = 0;
+        end
+    end
+    
+    % map return delay times and generate second service time
     for i = 1:length(values_retTime) 
         return_delay_times(rn_retTime >= ranges_retTime(i, 1) & rn_retTime <= ranges_retTime(i, 2)) = values_retTime(i);
     end 
-    % clear delay time if patient not returning (No = 2) 
+    
+    % clear delay time and generate second service time only if patient is returning
     for p = 1:N 
-        if return_decisions_numeric(p) == 2 
-            return_delay_times(p) = 0; 
-        end 
-    end 
+        if return_decisions_numeric(p) == 0
+            return_delay_times(p) = 0;
+            rn_retTime(p) = -1; %standardize no return random number
+            rn_service2(p) = -1;
+            second_service_times(p) = 0;
+        else 
+            second_service_times(p) = 5 + floor((rn_service2(p) / maxRange) * 10); %logic for 5-15 review time using the sixth random number (CHECK CHECK)
+            
     % print pre-computation summary table  
     disp('================================================================================================================='); 
     disp('Generated Patient Attributes Master Pre-Computation Array Matrix'); 
     disp('================================================================================================================='); 
     fprintf('|Pat ID|Arr Time |Triage Zone|Ser Time|Will Return?|Return Delay Time|\n'); 
     disp('-----------------------------------------------------------------------------------------------------------------'); 
+    
     % temporary holders for output strings
     triage_zones = cell(1, N); 
     return_decisions = cell(1, N); 
@@ -106,26 +124,36 @@ function patient_table = precomputeAttributes(N, maxRange, random_sequence, rang
             triage_zones{p} = 'Red'; 
         elseif triage_zones_numeric(p) == 2; 
             triage_zones{p} = 'Yellow'; 
-        elseif triage_zones_numeric(p) == 3; 
-            triage_zones{p} = 'Green (C1)'; 
-        elseif triage_zones_numeric(p) == 4; 
-            triage_zones{p} = 'Green (C2)'; 
-        else triage_zones{p} = 'Green (C3)'; 
-        end 
+        else
+           triage_zones{p} = 'Green';
+        end
+        
         % map return decisions 
         if return_decisions_numeric(p) == 1; 
             return_decisions{p} = 'Yes'; 
-        else return_decisions{p} = 'No'; 
+        else 
+            return_decisions{p} = 'No'; 
         end
     
         fprintf('|%-5d | %-8.2f| %-10s| %-7g| %-11s| %-16g|\n', p, arrival_times(p), triage_zones{p}, pre_service_times(p), return_decisions{p}, return_delay_times(p));
     end 
     disp('================================================================================================================='); 
     disp(' '); 
+    
     % output data map struct 
-    patient_table.arrival_times = arrival_times; 
-    patient_table.triage_zones = triage_zones; 
-    patient_table.service_times = pre_service_times; 
-    patient_table.return_decisions = return_decisions; 
-    patient_table.return_delay_times = return_delay_times; 
+    % passes every data to phase 3 usage
+    patient_table.p_id = (1:N)';
+    patient_table.rn_arr = rn_arrival';
+    patient_table.int_arr = interarrival_times';
+    patient_table.arr_time = arrival_times';
+    patient_table.rn_zone = rn_triage';
+    patient_table.zone = triage_zones_numeric'; % 1, 2, or 3
+    patient_table.rn_serv1 = rn_service'; 
+    patient_table.serv_time1 = pre_service_times'; 
+    patient_table.rn_ret = rn_return'; 
+    patient_table.needs_ret = return_decisions_numeric'; % 1 or 0 
+    patient_table.rn_ret_time = rn_retTime'; 
+    patient_table.ret_delay = return_delay_times'; 
+    patient_table.rn_serv2 = rn_service2'; 
+    patient_table.serv_time2 = second_service_times'; 
 end

@@ -3,10 +3,8 @@ clear; clc;
 disp('--- EmergencyDeptQueuingSystem (Phase 1) ---');
 disp(' ');
 
-% 1. ????: ?????????????? (N)
 N = input('Please enter the total patient : ');
 
-% ????????
 while isempty(N) || N <= 0
     disp('Error: Number of patient must more than 0!');
     N = input('Please Re-enter the total patient! : ');
@@ -47,28 +45,4 @@ switch choice
         disp('Selected: Uniform Random Variate Generator (URVG).');
         random_sequence = URVG(N); % Call URVG.m
         
-end
-
-disp(' ');
-disp('Random sequence generated successfully! The random value samples for the first 5 patients are:');
-
-% If the total number of patients (N) is greater than or equal to 5
-if N >= 5
-    
-    % Use a while loop to print the first 5 numbers
-    counter = 1;                     % 1. Set counter to start from 1 (FreeMat matrix index starts from 1)
-    while counter <= 5               % 2. Loop as long as counter is less than or equal to 5
-        disp(random_sequence(counter)); % 3. Print the random number at the current position
-        counter = counter + 1;       % 4. Increment the counter by 1
-    end
-
-% If the total number of patients is less than 5 (e.g., only 3 patients)
-else
-    
-    % Print as many times as the total number of patients using a while loop
-    counter = 1;
-    while counter <= N               % 2. Loop as long as counter is less than or equal to N
-        disp(random_sequence(counter)); 
-        counter = counter + 1;
-    end
 end

@@ -1,10 +1,12 @@
 clear; clc;
+jitcontrol off;
 
 disp('--- EmergencyDeptQueuingSystem (Phase 1) ---');
 disp(' ');
 
 % 1. ????: ?????????????? (N)
 N = input('Please enter the total patient : ');
+maxRange = 7;
 
 % ????????
 while isempty(N) || N <= 0
@@ -75,56 +77,64 @@ end
 
 %phase 2
 disp(' ');
-disp('===================================================================');
-disp('--- PHASE 2: Interactive Monte Carlo Attribute Setup ---');
-disp('===================================================================');
-disp(' ');
-%get precision threshold boundary upper bound range
-maxRange = input('Enter the random number maximum range scale limit:');
-disp(' ');
+disp('Generating simulation tables...');
 
-%triage zone assignment input
-disp('----Configure Triage Zone Assignment Table----');
-disp('Example label format:{''Red'', ''Yellow'', ''Green''}');
-triage_labels = input('Enter zone labels as cell array:');
-disp('Example probabilities format: [0.123333, 0.279345,0.983333]');
-triage_probs = input('Enter matching probabilities vector:');
+%triage zone assignment 
+values_triage = {'Red', 'Yellow', 'Green'};
+prob_triage = generateRandomProbabilities(3);
+[cdf_triage, ranges_triage] = printSimulationTable('Table 1: Triage Zone Assignment', 'Zone', values_triage, prob_triage, maxRange);
 disp(' ');
 
-%interarrival time table input
-disp('----Configure Interarrival Time Table----');
-disp('Example times format: [3,6,8,13,20]');
-interarrival_values = input('Enter interarrival times vector(minutes):');
-interarrival_probs = input('Enter matching probabilities vector:');
+%interarrival time table 
+values_arrival = [1, 2, 3, 4, 5];
+prob_arrival = generateRandomProbabilities(5);
+[cdf_arrival, ranges_arrival] = printSimulationTable('Table 2: Interarrival Time (minutes)', 'Time', values_arrival, prob_arrival, maxRange);
 disp(' ');
 
-%service time table input
-disp('----Configure Service Time Table for Counter----');
-disp('Example service times format: [10,15,20,25,30]');
-service_values = input('Enter service times vector(minutes):');
-service_probs = input('Enter matching probabilities vector:');
+% red zone counter service time table 
+values_serviceRed = [8, 10, 12, 14, 16];
+prob_serviceRed = generateRandomProbabilities(5);
+[cdf_serviceRed, ranges_serviceRed] = printSimulationTable('Table 3: Red Zone Counter Service Time (minutes)', 'Time', values_serviceRed, prob_serviceRed, maxRange);
 disp(' ');
 
-%return table input
-disp('----Configure Return Table(Will return or not)----');
-disp('Example decision labels format: {''Yes'', ''No''}');
-return_labels = input('Enter return labels as cell array:');
-return_probs = input('Enter matching probabilities vector:');
+%yellow zone counter service time table
+values_serviceYellow = [5, 7,9 ,11 ,13];
+prob_serviceYellow = generateRandomProbabilities(5);
+[cdf_serviceYellow, ranges_serviceYellow] = printSimulationTable('Table 4: Yellow Zone Counter Service Time (minutes)', 'Time', values_serviceYellow, prob_serviceYellow, maxRange);
 disp(' ');
 
-%return time table input
-disp('----Configure Return Time Table----');
-disp('Example delay times format: [15,20,30,45,60]');
-return_time_values = input('Enter return delay times vector(minutes):');
-return_time_probs = input('Enter matching probabilities vector:');
+%green zone counter1 service time table
+values_serviceGreen1 = [3, 5, 7, 9];
+prob_serviceGreen1 = generateRandomProbabilities(4);
+[cdf_serviceGreen1, ranges_serviceGreen1] = printSimulationTable('Table 5: Green Zone Counter 1 Service Time (minutes)', 'Time', values_serviceGreen1, prob_serviceGreen1, maxRange);
 disp(' ');
 
-%display all tables
-[cdf_triage, ranges_triage] = printSimulationTable('4. Triage Zone Assignment Table', 'Zone', triage_labels, triage_probs, maxRange);
-[cdf_arrival, ranges_arrival] = printSimulationTable('5. Interarrival Time Table', 'Interarrival Time (min)', interarrival_values, interarrival_probs, maxRange);
-[cdf_service, ranges_service] = printSimulationTable('6. Service Time Table (All Counters)', 'Service Time (min)', service_values, service_probs, maxRange); 
-[cdf_return, ranges_return] = printSimulationTable('7. Return Table (Will Return or Not)', 'Requires Return?', return_labels, return_probs, maxRange);
-[cdf_retTime, ranges_retTime] = printSimulationTable('8. Return Time Table (Other Dept Duration)', 'Delay Time (min)', return_time_values, return_time_probs, maxRange);
+%green zone counter2 service time table
+values_serviceGreen2 = [4, 6, 8, 10];
+prob_serviceGreen2 = generateRandomProbabilities(4);
+[cdf_serviceGreen2, ranges_serviceGreen2] = printSimulationTable('Table 6: Green Zone Counter 2 Service Time (minutes)', 'Time', values_serviceGreen2, prob_serviceGreen2, maxRange);
+disp(' ');
 
-%compute attributes using vectorized arrays
-patients_data = precomputeAttributes(N, maxRange, random_sequence, ranges_arrival, interarrival_values, ranges_triage, triage_labels, ranges_service, service_values, ranges_return, return_labels, ranges_retTime, return_time_values);
+%green zone counter3 service time table
+values_serviceGreen3 = [2, 4, 6, 8, 10];
+prob_serviceGreen3 = generateRandomProbabilities(5);
+[cdf_serviceGreen3, ranges_serviceGreen3] = printSimulationTable('Table 7: Green Zone Counter 3 Service Time (minutes)', 'Time', values_serviceGreen3, prob_serviceGreen3, maxRange);
+disp(' ');
+
+%return decisions table
+values_return = {'Yes','No'};
+prob_return = generateRandomProbabilities(2);
+[cdf_return, ranges_return] = printSimulationTable('Table 8: Return Decision', 'Decision', values_return, prob_return, maxRange);
+disp(' ');
+
+%return delay time table
+values_retTime = [5, 10, 15, 20, 25]
+prob_retTime = generateRandomProbabilities(5);
+[cdf_retTime, ranges_retTime] = printSimulationTable('Table 9: Return Delay Time (minutes)', 'Time', values_retTime, prob_retTime, maxRange);
+disp(' ');
+
+values_service = [5, 7, 10, 12, 15];
+prob_service = generateRandomProbabilities(5);
+[cdf_service, ranges_service] = printSimulationTable('Table (internal): Generic Service Time', 'Time', values_service, prob_service, maxRange);
+patient_table = precomputeAttributes(N, maxRange, random_sequence, ranges_arrival, values_arrival, ranges_triage, values_triage, ranges_serviceRed, values_serviceRed, ranges_serviceYellow, values_serviceYellow, ranges_serviceGreen1, values_serviceGreen1, ranges_serviceGreen2, values_serviceGreen2, ranges_serviceGreen3, values_serviceGreen3, ranges_return, values_return, ranges_retTime, values_retTime);
+disp('Simulation setup complete.');

@@ -128,7 +128,7 @@ prob_return = generateRandomProbabilities(2);
 disp(' ');
 
 %return delay time table
-values_retTime = [5, 10, 15, 20, 25]
+values_retTime = [5, 10, 15, 20, 25];
 prob_retTime = generateRandomProbabilities(5);
 [cdf_retTime, ranges_retTime] = printSimulationTable('Table 9: Return Delay Time (minutes)', 'Time', values_retTime, prob_retTime, maxRange);
 disp(' ');

@@ -1,16 +1,18 @@
-clear; clc;
+clear; clc; 
 jitcontrol off;
 
 disp('--- EmergencyDeptQueuingSystem (Phase 1) ---');
 disp(' ');
 
 N = input('Please enter the total patient : ');
-maxRange = 7;
 
-while isempty(N) || N <= 0
-    disp('Error: Number of patient must more than 0!');
-    N = input('Please Re-enter the total patient! : ');
+if isempty(N) || N <= 0
+    N = input('Please enter the total patient : ');
+else
+    disp('Error: Invalid')
+    N = input('Please Re-enter the total patient : ');
 end
+
 
 disp(' ');
 disp('Please choose the type of random number generator to use:');
@@ -20,15 +22,13 @@ disp('3. Exponential Random Variate Generator (ERVG)');
 disp('4. Uniform Random Variate Generator (URVG)');
 disp(' ');
 
-% 2. User Input: Prompt user to choose the generator type
+choice = 0; 
 choice = input('Please enter your choice (1-4): ');
 
-while isempty(choice) || choice < 1 || choice > 4
-    disp('Error: Invalid choice! Please select a number between 1 and 4.');
-    choice = input('Please enter your choice (1-4): ');
+if isempty(choice) || choice < 1 || choice > 4
+   disp('Error: Invalid choice! Please select a number between 1 and 4.');
 end
 
-disp(' ');
 % 3. Task Logic: Call the corresponding module based on user selection
 switch choice
     case 1
@@ -49,33 +49,9 @@ switch choice
         
 end
 
-disp(' ');
-disp('Random sequence generated successfully! The random value samples for the first 5 patients are:');
-
-% If the total number of patients (N) is greater than or equal to 5
-if N >= 5
-    
-    % Use a while loop to print the first 5 numbers
-    counter = 1;                     % 1. Set counter to start from 1 (FreeMat matrix index starts from 1)
-    while counter <= 5               % 2. Loop as long as counter is less than or equal to 5
-        disp(random_sequence(counter)); % 3. Print the random number at the current position
-        counter = counter + 1;       % 4. Increment the counter by 1
-    end
-
-% If the total number of patients is less than 5 (e.g., only 3 patients)
-else
-    
-    % Print as many times as the total number of patients using a while loop
-    counter = 1;
-    while counter <= N               % 2. Loop as long as counter is less than or equal to N
-        disp(random_sequence(counter)); 
-        counter = counter + 1;
-    end
-end
-
 %phase 2
-disp(' ');
-disp('Generating simulation tables...');
+    disp(' ');
+    disp('Generating simulation tables...');
 
 %triage zone assignment 
 values_triage = {'Red', 'Yellow', 'Green'};

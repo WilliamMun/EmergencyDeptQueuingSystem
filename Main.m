@@ -58,7 +58,7 @@ end
 
 %triage zone assignment 
 values_triage = {'Red', 'Yellow', 'Green'};
-prob_triage = generateRandomProbabilities(3);
+prob_triage = sort(generateRandomProbabilities(3));
 [cdf_triage, ranges_triage] = printSimulationTable('Table 1: Triage Zone Assignment', 'Zone', values_triage, prob_triage, maxRange);
 disp(' ');
 

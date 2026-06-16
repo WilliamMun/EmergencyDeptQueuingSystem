@@ -3,6 +3,7 @@ function master_log = QueueEngine(N, patient_table)
     p_id = patient_table.p_id;
     rn_arr = patient_table.rn_arr;
     int_arr = patient_table.int_arr;
+    arr_time = patient_table.arr_time;
     rn_zone = patient_table.rn_zone; 
     zone = patient_table.zone; 
     rn_serv1 = patient_table.rn_serv1; 
@@ -30,7 +31,7 @@ function master_log = QueueEngine(N, patient_table)
         fprintf('| %8d | %10s | %17s | %12d | %14d | %11s |\n', p_id(i), rn_a_str, int_a_str, arr_time(i), rn_zone(i), zone_names{zone(i)}); 
         
     end
-    fprint('\n');
+    fprintf('\n');
     
     %queue system
     
@@ -46,7 +47,8 @@ function master_log = QueueEngine(N, patient_table)
     
     % queue engine based on time
     while size(event_list, 1) > 0 
-        event_list = sortrows(event_list, 1); 
+        [dummy_sort, sorted_indices] = sort(event_list(:, 1)); 
+        event_list = event_list(sorted_indices, :);
         
         curr_time = event_list(1, 1); 
         curr_id = event_list(1, 2); 
@@ -61,7 +63,7 @@ function master_log = QueueEngine(N, patient_table)
             elseif p_zone == 2
                 c_idx = 2;
             elseif p_zone == 3
-                [~, min_g] = min(counter_avail(3:5)); 
+                [dummy_value, min_g] = min(counter_avail(3:5)); 
                 c_idx = 2 + min_g; 
             end
             
@@ -80,7 +82,7 @@ function master_log = QueueEngine(N, patient_table)
             
             if needs_ret(curr_id) == 1
                 t_return = end_time + ret_delay(curr_id);
-                event_list = [event_list; t_return, cuur_id, 2];
+                event_list = [event_list; t_return, curr_id, 2];
             else
                 master_log(curr_id,13) = end_time - arr_time(curr_id);
             end
@@ -102,7 +104,7 @@ function master_log = QueueEngine(N, patient_table)
     end
     
     %print final counter table
-    counter_name = {'Red Zone Counter', 'Yellow Zone Counter', 'Green Zone Counter 1', 'Green Zone Counter 2', 'Green Zone Counter 3'};
+    counter_names = {'Red Zone Counter', 'Yellow Zone Counter', 'Green Zone Counter 1', 'Green Zone Counter 2', 'Green Zone Counter 3'};
     
     for c = 1:5
         patients_in_counter = find(master_log(:, 14) == c);
@@ -110,11 +112,10 @@ function master_log = QueueEngine(N, patient_table)
             continue 
         end
         
-        fprintf('============================================================================================================================================================================================\n');
-        fprintf('                                                                                             %s\n', counter_names{c});  
-        fprintf('============================================================================================================================================================================================\n'); 
-        fprintf('|Patient ID|Arrival Time|RN Service|Time service begin|Service Time|RN Return|Need to return?|RN Return Time|Return Time|Time service continue|Time service end|Waiting Time|Time in hosp.|\n'); 
-        
+        fprintf('========================================================================================================================================\n');
+        fprintf('                                               %s\n', counter_names{c});  
+        fprintf('=========================================================================================================================================\n'); 
+        fprintf('| Pat ID | Arr Time | RN Srv | Srv Begin | Srv Time | RN Ret | Ret? | RN Ret T | Ret Time | Srv Cont | Srv End | Wait Time | Hosp Time |\n');         
         for idx = 1:length(patients_in_counter) 
             pid = patients_in_counter(idx); 
             row = master_log(pid, :); 
@@ -124,8 +125,9 @@ function master_log = QueueEngine(N, patient_table)
             rt_str = sprintf('%d', row(8)); if row(7) == 0, rt_str = '-'; end 
             cont_str = sprintf('%d', row(10)); if row(10) == -1, cont_str = '-'; end 
             
-            fprintf('| %8d | %12d | %10d | %18d | %12d | %9d | %13s | %14s | %11s | %21s | %16d | %12d | %13d |\n', row(1), row(2), row(3), row(4), row(5), row(6), ret_str, rn_rt_str, rt_str, cont_str, row(11), row(12), row(13)); 
+            fprintf('| %6d | %8d | %6d | %9d | %8d | %6d | %4s | %8s | %8s | %8s | %7d | %9d | %9d |\n', row(1), row(2), row(3), row(4), row(5), row(6), ret_str, rn_rt_str, rt_str, cont_str, row(11), row(12), row(13));
         end
         fprintf('\n');
     end
+    
     

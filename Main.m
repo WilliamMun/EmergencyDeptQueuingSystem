@@ -11,7 +11,6 @@ if isempty(N) || N <= 0
 else
     disp('Error: Invalid')
     N = input('Please Re-enter the total patient : ');
->>>>>>> main
 end
 
 

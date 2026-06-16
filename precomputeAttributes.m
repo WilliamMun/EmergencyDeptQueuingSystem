@@ -162,38 +162,6 @@ function patient_table = precomputeAttributes(N, maxRange, random_sequence, rang
             second_service_times(p) = srv2_time;
         end
     end
-            
-    % print pre-computation summary table  
-    disp('================================================================================================================='); 
-    disp('Generated Patient Attributes Master Pre-Computation Array Matrix'); 
-    disp('================================================================================================================='); 
-    fprintf('|Pat ID|Arr Time |Triage Zone|Ser Time|Will Return?|Return Delay Time|2nd Ser Time|\n'); 
-    disp('-----------------------------------------------------------------------------------------------------------------'); 
-    
-    % temporary holders for output strings
-    triage_zones = cell(1, N); 
-    return_decisions = cell(1, N); 
-    for p = 1:N 
-        % map zone ids 
-        if triage_zones_numeric(p) == 1; 
-            triage_zones{p} = 'Red'; 
-        elseif triage_zones_numeric(p) == 2; 
-            triage_zones{p} = 'Yellow'; 
-        else
-           triage_zones{p} = 'Green';
-        end
-        
-        % map return decisions 
-        if return_decisions_numeric(p) == 1; 
-            return_decisions{p} = 'Yes'; 
-        else 
-            return_decisions{p} = 'No'; 
-        end
-    
-        fprintf('|%-5d | %-8.2f| %-10s| %-7g| %-11s| %-16g| %-11g|\n', p, arrival_times(p), triage_zones{p}, pre_service_times(p), return_decisions{p}, return_delay_times(p), second_service_times(p));
-    end 
-    disp('================================================================================================================='); 
-    disp(' '); 
     
     % output data map struct 
     % passes every data to phase 3 usage

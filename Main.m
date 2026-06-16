@@ -110,15 +110,8 @@ prob_retTime = generateRandomProbabilities(5);
 [cdf_retTime, ranges_retTime] = printSimulationTable('Table 9: Return Delay Time (minutes)', 'Time', values_retTime, prob_retTime, maxRange);
 disp(' ');
 
-values_service = [5, 7, 10, 12, 15];
-prob_service = generateRandomProbabilities(5);
-[cdf_service, ranges_service] = printSimulationTable('Table (internal): Generic Service Time', 'Time', values_service, prob_service, maxRange);
 patient_table = precomputeAttributes(N, maxRange, random_sequence, ranges_arrival, values_arrival, ranges_triage, values_triage, ranges_serviceRed, values_serviceRed, ranges_serviceYellow, values_serviceYellow, ranges_serviceGreen1, values_serviceGreen1, ranges_serviceGreen2, values_serviceGreen2, ranges_serviceGreen3, values_serviceGreen3, ranges_return, values_return, ranges_retTime, values_retTime);
 disp('Simulation setup complete.');
-
-patient_table = precomputeAttributes(N, maxRange, random_sequence, ranges_arrival, values_arrival, ranges_triage, values_triage, ranges_serviceRed, values_serviceRed, ranges_serviceYellow, values_serviceYellow, ranges_serviceGreen1, values_serviceGreen1, ranges_serviceGreen2, values_serviceGreen2, ranges_serviceGreen3, values_serviceGreen3, ranges_return, values_return, ranges_retTime, values_retTime); 
-disp('Simulation setup complete.'); 
-disp(' ');
 
 disp('Executing Phase 3: Event-Driven Queue Engine...'); 
 disp(' ');

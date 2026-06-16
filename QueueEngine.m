@@ -14,25 +14,43 @@ function master_log = QueueEngine(N, patient_table)
     ret_delay = patient_table.ret_delay; 
     serv_time2 = patient_table.serv_time2; 
     
-    %display interarrival table column name
-    fprintf('=================================================================================\n');
-    fprintf('                               Interarrival Time Table\n');
-    fprintf('=================================================================================\n');
-    fprintf('|Patient ID|RN Arrival|Interarrival Time|Arrival Time|RN Triage Zone|Triage Zone|\n');
-    zone_names ={'Red','Yellow','Green'};
+    %display  patient RN and their values returned
     
-    for i = 1:N
-        rn_a_str = sprintf('%d', rn_arr(i)); if rn_arr(i) == -1, rn_a_str = '-'; 
-        end 
+    fprintf('=========================================================================================\n'); 
+    fprintf('                       TABLE 1: PATIENT RANDOM NUMBERS \n'); 
+    fprintf('=========================================================================================\n'); 
+    fprintf('| Pat ID | RN Arr | RN Zone | RN Ser 1 | RN Ret | RN Ret T | RN Ser 2 |\n'); 
+    fprintf('-----------------------------------------------------------------------------------------\n'); 
+    
+    for i = 1:N 
+        rn_a_str = sprintf('%d', rn_arr(i)); if rn_arr(i) == -1, rn_a_str = '-'; end 
+        rn_rt_str = sprintf('%d', rn_ret_time(i)); if rn_ret_time(i) == -1, rn_rt_str = '-'; end 
+        rn_s2_val = patient_table.rn_serv2(i); 
+        rn_s2_str = sprintf('%d', rn_s2_val); if rn_s2_val == -1, rn_s2_str = '-'; end 
         
-        int_a_str = sprintf('%d', int_arr(i)); if i == 1, int_a_str = '-'; 
-        end 
-        
-        fprintf('| %8d | %10s | %17s | %12d | %14d | %11s |\n', p_id(i), rn_a_str, int_a_str, arr_time(i), rn_zone(i), zone_names{zone(i)}); 
+        fprintf('| %6d | %6s | %7d | %8d | %6d | %8s | %8s |\n', p_id(i), rn_a_str, rn_zone(i), rn_serv1(i), rn_ret(i), rn_rt_str, rn_s2_str); 
         
     end
-    fprintf('\n');
     
+    fprintf('=========================================================================================\n\n'); 
+    
+    fprintf('====================================================================================================\n'); 
+    fprintf('                       TABLE 2: PATIENT MAPPED VALUES \n'); 
+    fprintf('====================================================================================================\n'); 
+    fprintf('| Pat ID | Int Arr | Arr Time | Zone | Ser Time 1 | Will Ret? | Ret Delay | Ser Time 2 |\n'); 
+    fprintf('----------------------------------------------------------------------------------------------------\n'); 
+    
+    zone_names = {'Red', 'Yellow', 'Green'}; 
+    for i = 1:N 
+        int_a_str = sprintf('%d', int_arr(i)); if i == 1, int_a_str = '-'; end 
+        ret_str = 'No'; if needs_ret(i) == 1, ret_str = 'Yes'; end 
+        ret_d_str = sprintf('%d', ret_delay(i)); if needs_ret(i) == 0, ret_d_str = '-'; end 
+        ser2_str = sprintf('%d', serv_time2(i)); if needs_ret(i) == 0, ser2_str = '-'; end 
+        
+        fprintf('| %6d | %7s | %8d | %6s | %10d | %9s | %9s | %10s |\n', p_id(i), int_a_str, arr_time(i), zone_names{zone(i)}, serv_time1(i), ret_str, ret_d_str, ser2_str); 
+    end
+    fprintf('====================================================================================================\n\n');
+
     %queue system
     
     counter_avail = [0,0,0,0,0];
@@ -112,22 +130,28 @@ function master_log = QueueEngine(N, patient_table)
             continue 
         end
         
-        fprintf('========================================================================================================================================\n');
-        fprintf('                                               %s\n', counter_names{c});  
-        fprintf('=========================================================================================================================================\n'); 
-        fprintf('| Pat ID | Arr Time | RN Srv | Srv Begin | Srv Time | RN Ret | Ret? | RN Ret T | Ret Time | Srv Cont | Srv End | Wait Time | Hosp Time |\n');         
+        fprintf('=================================================================================================================================\n'); 
+        fprintf('                                             %s\n', counter_names{c}); 
+        fprintf('=================================================================================================================================\n'); 
+        fprintf('| Pat ID | Arr Time | S1 Begin | S1 Time | S1 End | Will Ret? | Ret Delay | S2 Begin | S2 Time | S2 End | Wait Time | Hosp Time |\n'); 
+        fprintf('---------------------------------------------------------------------------------------------------------------------------------\n'); 
+        
         for idx = 1:length(patients_in_counter) 
             pid = patients_in_counter(idx); 
             row = master_log(pid, :); 
             
-            ret_str = 'No'; if row(7) == 1, ret_str = 'Yes'; end 
-            rn_rt_str = sprintf('%d', row(8)); if row(8) == -1, rn_rt_str = '-'; end 
-            rt_str = sprintf('%d', row(8)); if row(7) == 0, rt_str = '-'; end 
-            cont_str = sprintf('%d', row(10)); if row(10) == -1, cont_str = '-'; end 
+            % Calculate Service 1 End 
+            s1_end = row(4) + row(5); 
             
-            fprintf('| %6d | %8d | %6d | %9d | %8d | %6d | %4s | %8s | %8s | %8s | %7d | %9d | %9d |\n', row(1), row(2), row(3), row(4), row(5), row(6), ret_str, rn_rt_str, rt_str, cont_str, row(11), row(12), row(13));
+            ret_str = 'No'; if row(7) == 1, ret_str = 'Yes'; end 
+            ret_delay_str = sprintf('%d', row(9)); if row(7) == 0, ret_delay_str = '-'; end 
+            
+            s2_begin_str = sprintf('%d', row(10)); if row(10) == -1, s2_begin_str = '-'; end 
+            s2_time_str = sprintf('%d', row(11) - row(10)); if row(10) == -1, s2_time_str = '-'; end 
+            s2_end_str = sprintf('%d', row(11)); if row(10) == -1, s2_end_str = '-'; end 
+            
+            fprintf('| %6d | %8d | %8d | %7d | %6d | %9s | %9s | %8s | %7s | %6s | %9d | %9d |\n',row(1), row(2), row(4), row(5), s1_end, ret_str, ret_delay_str, s2_begin_str, s2_time_str, s2_end_str, row(12), row(13)); 
         end
         fprintf('\n');
+        
     end
-    
-    

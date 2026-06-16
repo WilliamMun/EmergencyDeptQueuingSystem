@@ -1,20 +1,21 @@
 clear; clc; 
 jitcontrol off;
 
-disp('--- EmergencyDeptQueuingSystem (Phase 1) ---');
-disp(' ');
+disp('--- EmergencyDeptQueuingSystem (Phase 1) ---'); 
+disp(' ');  
 
-% 1. ????: ?????????????? (N)
-N = input('Please enter the total patient : '); 
+N = 0;
+
+while isempty(N) || N <= 0 
+    
+    if N < 0 
+        disp('Error'); 
+    end  
+    
+    N = input('Please enter the total patient : '); 
+end 
+
 maxRange = 100;
-
-
-while isempty(N) || N <= 0
-    disp('Error');
-    N = input('Please reenter total patient: ');
-end
-
-
 
 disp(' ');
 disp('Please choose the type of random number generator to use:');
@@ -28,7 +29,7 @@ choice = input('Please enter your choice (1-4): ');
 
 while isempty(choice) || choice < 1 || choice > 4
     disp('Error');
-    choice = input('Please reenter choice');
+    choice = input('Please reenter choice (1-4): ');
 end
 
 % 3. Task Logic: Call the corresponding module based on user selection

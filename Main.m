@@ -4,16 +4,14 @@ jitcontrol off;
 disp('--- EmergencyDeptQueuingSystem (Phase 1) ---');
 disp(' ');
 
-% 1. ????: ?????????????? (N)
-N = input('Please enter the total patient : '); 
-maxRange = 100;
+N = input('Please enter the total patient : ');
 
-
-while isempty(N) || N <= 0
-    disp('Error');
-    N = input('Please reenter total patient: ');
+if isempty(N) || N >= 0
+    N = input('Please enter the total patient : ');
+else
+    disp('Error: Invalid')
+    N = input('Please Re-enter the total patient : ');
 end
-
 
 
 disp(' ');
@@ -24,30 +22,30 @@ disp('3. Exponential Random Variate Generator (ERVG)');
 disp('4. Uniform Random Variate Generator (URVG)');
 disp(' ');
 
+choice = 0; 
 choice = input('Please enter your choice (1-4): ');
 
-while isempty(choice) || choice < 1 || choice > 4
-    disp('Error');
-    choice = input('Please reenter choice');
+if isempty(choice) || choice < 1 || choice > 4
+   disp('Error: Invalid choice! Please select a number between 1 and 4.');
 end
 
 % 3. Task Logic: Call the corresponding module based on user selection
 switch choice
     case 1
         disp('Selected: Built-in rand() algorithm.');
-        random_sequence = rand(1, 6 * N);
+        random_sequence = rand(1, 5 * N);
         
     case 2
         disp('Selected: Mixed Full-Period LCG algorithm.');
-        random_sequence = LCG(6 * N); % Call LCG.m
+        random_sequence = LCG(5 * N); % Call LCG.m
         
     case 3
         disp('Selected: Exponential Random Variate Generator (ERVG).');
-        random_sequence = ERVG(6 * N); % Call ERVG.m
+        random_sequence = ERVG(5 * N); % Call ERVG.m
         
     case 4
         disp('Selected: Uniform Random Variate Generator (URVG).');
-        random_sequence = URVG(6 * N); % Call URVG.m
+        random_sequence = URVG(5 * N); % Call URVG.m
         
 end
 
@@ -114,12 +112,3 @@ prob_service = generateRandomProbabilities(5);
 [cdf_service, ranges_service] = printSimulationTable('Table (internal): Generic Service Time', 'Time', values_service, prob_service, maxRange);
 patient_table = precomputeAttributes(N, maxRange, random_sequence, ranges_arrival, values_arrival, ranges_triage, values_triage, ranges_serviceRed, values_serviceRed, ranges_serviceYellow, values_serviceYellow, ranges_serviceGreen1, values_serviceGreen1, ranges_serviceGreen2, values_serviceGreen2, ranges_serviceGreen3, values_serviceGreen3, ranges_return, values_return, ranges_retTime, values_retTime);
 disp('Simulation setup complete.');
-
-patient_table = precomputeAttributes(N, maxRange, random_sequence, ranges_arrival, values_arrival, ranges_triage, values_triage, ranges_serviceRed, values_serviceRed, ranges_serviceYellow, values_serviceYellow, ranges_serviceGreen1, values_serviceGreen1, ranges_serviceGreen2, values_serviceGreen2, ranges_serviceGreen3, values_serviceGreen3, ranges_return, values_return, ranges_retTime, values_retTime); 
-disp('Simulation setup complete.'); 
-disp(' ');
-
-disp('Executing Phase 3: Event-Driven Queue Engine...'); 
-disp(' ');
-
-final_master_log = QueueEngine(N, patient_table);

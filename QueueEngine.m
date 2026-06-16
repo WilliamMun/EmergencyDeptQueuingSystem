@@ -153,5 +153,4 @@ function master_log = QueueEngine(N, patient_table)
             fprintf('| %6d | %8d | %8d | %7d | %6d | %9s | %9s | %8s | %7s | %6s | %9d | %9d |\n',row(1), row(2), row(4), row(5), s1_end, ret_str, ret_delay_str, s2_begin_str, s2_time_str, s2_end_str, row(12), row(13)); 
         end
         fprintf('\n');
-        
-    end
+    end 

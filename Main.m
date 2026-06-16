@@ -4,13 +4,14 @@ jitcontrol off;
 disp('--- EmergencyDeptQueuingSystem (Phase 1) ---');
 disp(' ');
 
+% 1. ????: ?????????????? (N)
 N = input('Please enter the total patient : ');
-
 if isempty(N) || N <= 0
     N = input('Please enter the total patient : ');
 else
     disp('Error: Invalid')
     N = input('Please Re-enter the total patient : ');
+>>>>>>> main
 end
 
 
@@ -33,19 +34,19 @@ end
 switch choice
     case 1
         disp('Selected: Built-in rand() algorithm.');
-        random_sequence = rand(1, 5 * N);
+        random_sequence = rand(1, 6 * N);
         
     case 2
         disp('Selected: Mixed Full-Period LCG algorithm.');
-        random_sequence = LCG(5 * N); % Call LCG.m
+        random_sequence = LCG(6 * N); % Call LCG.m
         
     case 3
         disp('Selected: Exponential Random Variate Generator (ERVG).');
-        random_sequence = ERVG(5 * N); % Call ERVG.m
+        random_sequence = ERVG(6 * N); % Call ERVG.m
         
     case 4
         disp('Selected: Uniform Random Variate Generator (URVG).');
-        random_sequence = URVG(5 * N); % Call URVG.m
+        random_sequence = URVG(6 * N); % Call URVG.m
         
 end
 
@@ -102,7 +103,7 @@ prob_return = generateRandomProbabilities(2);
 disp(' ');
 
 %return delay time table
-values_retTime = [5, 10, 15, 20, 25];
+values_retTime = [5, 10, 15, 20, 25]
 prob_retTime = generateRandomProbabilities(5);
 [cdf_retTime, ranges_retTime] = printSimulationTable('Table 9: Return Delay Time (minutes)', 'Time', values_retTime, prob_retTime, maxRange);
 disp(' ');

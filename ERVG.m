@@ -7,18 +7,5 @@ function output = ERVG(N) % ??: ?? N ???????????? [cite: 502]
     % ?? 1: ???????? rand() ?? N ? [0, 1] ?????? R [cite: 496] 
     R = rand(1, N); 
     % ?? 2: ????????? X [cite: 499] % ??: ????????? .ln ??? FreeMat/MATLAB ??? 
-    X = (-1 / lambda) .* log(1 - R); % Xi = (-1/lambda) * ln(1-Ri) [cite: 503]
-    if N > 1
-       X_min = min(X);
-       X_max = max(X);
-       if X_max > X_min
-           X_normalized = (X - X_min) ./ (X_max - X_min);
-       else
-           X_normalized = zeros(1,N);
-       end
-    else
-        X_normalized = 0.5;
-    end
-    X_normalized(X_normalized >= 1.0) = 0.999999;
-    output = X_normalized;
+    log() X = (-1 / lambda) .* log(1 - R); % Xi = (-1/lambda) * ln(1-Ri) [cite: 503] 
 end

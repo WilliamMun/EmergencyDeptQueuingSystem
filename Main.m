@@ -116,4 +116,6 @@ disp('Simulation setup complete.');
 disp('Executing Phase 3: Event-Driven Queue Engine...'); 
 disp(' ');
 
-final_master_log = QueueEngine(N, patient_table);
+[final_master_log, counter_data, service_data] = QueueEngine(N, patient_table);
+
+interpret(N, counter_data, service_data, final_master_log);

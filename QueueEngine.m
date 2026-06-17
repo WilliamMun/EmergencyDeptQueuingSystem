@@ -1,4 +1,4 @@
-function master_log = QueueEngine(N, patient_table)
+function [master_log, counter_data, service_data] = QueueEngine(N, patient_table)
     % receive data
     p_id = patient_table.p_id;
     rn_arr = patient_table.rn_arr;
@@ -37,7 +37,7 @@ function master_log = QueueEngine(N, patient_table)
     fprintf('====================================================================================================\n'); 
     fprintf('                       TABLE 2: PATIENT MAPPED VALUES \n'); 
     fprintf('====================================================================================================\n'); 
-    fprintf('| Pat ID | Int Arr | Arr Time | Zone | Ser Time 1 | Will Ret? | Ret Delay | Ser Time 2 |\n'); 
+    fprintf('| Pat ID | Int Arr | Arr Time |  Zone  | Ser Time 1 | Will Ret? | Ret Delay | Ser Time 2 |\n'); 
     fprintf('----------------------------------------------------------------------------------------------------\n'); 
     
     zone_names = {'Red', 'Yellow', 'Green'}; 
@@ -76,14 +76,28 @@ function master_log = QueueEngine(N, patient_table)
         p_zone = zone(curr_id); 
         
         if v_type == 1 
+            
+            [min_green_time, best_green_idx] = min(counter_avail(3:5));
+            best_green_counter = 2 + best_green_idx;
+            
             if p_zone == 1
-                c_idx = 1;
+                if min_green_time < counter_avail(1)
+                    c_idx = best_green_counter;
+                else 
+                    c_idx = 1;
+                end
+                
             elseif p_zone == 2
-                c_idx = 2;
+                if min_green_time < counter_avail(2)
+                    c_idx = best_green_counter;
+                else 
+                    c_idx = 2;
+                end
+                
             elseif p_zone == 3
-                [dummy_value, min_g] = min(counter_avail(3:5)); 
-                c_idx = 2 + min_g; 
-            end
+                c_idx = best_green_counter;
+                
+            end 
             
             doc_assigned(curr_id) = c_idx; 
             master_log(curr_id, 14) = c_idx; 
@@ -153,4 +167,39 @@ function master_log = QueueEngine(N, patient_table)
             fprintf('| %6d | %8d | %8d | %7d | %6d | %9s | %9s | %8s | %7s | %6s | %9d | %9d |\n',row(1), row(2), row(4), row(5), s1_end, ret_str, ret_delay_str, s2_begin_str, s2_time_str, s2_end_str, row(12), row(13)); 
         end
         fprintf('\n');
-    end 
+        
+    end
+    
+    %Extract data into counter_data for interpretation
+    counter_data = cell(1,5);
+    service_data = cell(1,5);
+    
+    for c = 1:5
+        patients_in_counter = find(master_log(:,14) == c);
+        
+        if ~isempty(patients_in_counter)
+            
+            wait_times = master_log(patients_in_counter, 12); %Patient wait time
+            
+            hosp_times = master_log(patients_in_counter, 13); %Time spent by patient in hospital
+            
+            s1_times = master_log(patients_in_counter, 5);
+            s2_start = master_log(patients_in_counter, 10);
+            s2_end = master_log(patients_in_counter, 11);
+            s2_times = s2_end - s2_start;
+            s2_times(s2_start == -1) = 0;
+            valid_s2_times = s2_times(s2_times > 0);
+            service_data{c} = [s1_times; valid_s2_times]; %Average service time
+            
+            ret_decisions = master_log(patients_in_counter, 7); %Return decision, either yes or no
+            
+            ret_time = master_log(patients_in_counter, 9); %Return delay time
+            
+            counter_data{c} = [wait_times, hosp_times, ret_decisions, ret_time];
+            
+        else 
+            counter_data{c} = [];
+            service_data{c} = [];
+        end
+    end
+end

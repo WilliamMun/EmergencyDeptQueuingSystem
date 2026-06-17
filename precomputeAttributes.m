@@ -1,6 +1,6 @@
 function patient_table = precomputeAttributes(N, maxRange, random_sequence, ranges_arrival, values_arrival, ranges_triage, values_triage, ranges_serviceRed, values_serviceRed, ranges_serviceYellow, values_serviceYellow, ranges_serviceGreen1, values_serviceGreen1, ranges_serviceGreen2, values_serviceGreen2, ranges_serviceGreen3, values_serviceGreen3, ranges_return, values_return, ranges_retTime, values_retTime) 
     jitcontrol off;
-    random_matrix = reshape(random_sequence, 6, N); %added 6 rows, one more random number for the second service if they go xray
+    random_matrix = reshape(random_sequence, 7, N); %added 6 rows, one more random number for the second service if they go xray
     % scale random elements 
     rn_arrival = floor(random_matrix(1, :) * maxRange) + 1; 
     rn_triage = floor(random_matrix(2, :) * maxRange) + 1; 
@@ -59,7 +59,7 @@ function patient_table = precomputeAttributes(N, maxRange, random_sequence, rang
             
         elseif zone_idx == 3 % green 
             % phase 2 calculates green service times only, then phase 3 will decied which counter the patient will go based on availability
-            green_counter_choice = floor(random_matrix(3, p) * 3) + 1; 
+            green_counter_choice = floor(random_matrix(7, p) * 3) + 1; 
             green_assigned(p) = green_counter_choice; % save the specific doctor to memory
             
             if green_counter_choice == 1 

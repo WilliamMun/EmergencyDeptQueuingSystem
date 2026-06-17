@@ -36,19 +36,19 @@ end
 switch choice
     case 1
         disp('Selected: Built-in rand() algorithm.');
-        random_sequence = rand(1, 6 * N);
+        random_sequence = rand(1, 7 * N);
         
     case 2
         disp('Selected: Mixed Full-Period LCG algorithm.');
-        random_sequence = LCG(6 * N); % Call LCG.m
+        random_sequence = LCG(7 * N); % Call LCG.m
         
     case 3
         disp('Selected: Exponential Random Variate Generator (ERVG).');
-        random_sequence = ERVG(6 * N); % Call ERVG.m
+        random_sequence = ERVG(7 * N); % Call ERVG.m
         
     case 4
         disp('Selected: Uniform Random Variate Generator (URVG).');
-        random_sequence = URVG(6 * N); % Call URVG.m
+        random_sequence = URVG(7 * N); % Call URVG.m
         
 end
 

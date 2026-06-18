@@ -1,6 +1,10 @@
 clear; clc; 
 jitcontrol off;
 
+%========================================================================================================
+%Random Number Generator and User Input
+%========================================================================================================
+
 disp(' ');
 disp('==========================================================================================='); 
 disp('                  HOSPITAL EMERGENCY DEPARTMENT QUEUING SYSTEM SIMULATION                   ');
@@ -34,7 +38,6 @@ while isempty(choice) || choice < 1 || choice > 4
     choice = input('Please reenter choice (1-4): ');
 end
 
-% 3. Task Logic: Call the corresponding module based on user selection
 switch choice
     case 1
         disp('Selected: Built-in rand() algorithm.');
@@ -54,7 +57,10 @@ switch choice
         
 end
 
-%phase 2
+%========================================================================================================
+%Generate setup table
+%========================================================================================================
+
 disp(' ');
 disp('Generating simulation tables...');
 
@@ -64,6 +70,14 @@ patient_table = precomputeAttributes(N, maxRange, random_sequence, ranges_arriva
 disp('Simulation setup complete.');
 disp(' ');
 
+%========================================================================================================
+%Generate service table for each counter
+%========================================================================================================
+
 [final_master_log, counter_data, service_data] = QueueEngine(N, patient_table);
+
+%========================================================================================================
+%Result interpretation
+%========================================================================================================
 
 interpret(N, counter_data, service_data, final_master_log);

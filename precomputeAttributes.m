@@ -1,6 +1,6 @@
 function patient_table = precomputeAttributes(N, maxRange, random_sequence, ranges_arrival, values_arrival, ranges_triage, values_triage, ranges_serviceRed, values_serviceRed, ranges_serviceYellow, values_serviceYellow, ranges_serviceGreen1, values_serviceGreen1, ranges_serviceGreen2, values_serviceGreen2, ranges_serviceGreen3, values_serviceGreen3, ranges_return, values_return, ranges_retTime, values_retTime) 
     jitcontrol off;
-    random_matrix = reshape(random_sequence, 6, N); %added 6 rows, one more random number for the second service if they go xray
+    random_matrix = reshape(random_sequence, 7, N); %added 6 rows, one more random number for the second service if they go xray
     % scale random elements 
     rn_arrival = floor(random_matrix(1, :) * maxRange) + 1; 
     rn_triage = floor(random_matrix(2, :) * maxRange) + 1; 
@@ -59,7 +59,7 @@ function patient_table = precomputeAttributes(N, maxRange, random_sequence, rang
             
         elseif zone_idx == 3 % green 
             % phase 2 calculates green service times only, then phase 3 will decied which counter the patient will go based on availability
-            green_counter_choice = floor(random_matrix(3, p) * 3) + 1; 
+            green_counter_choice = floor(random_matrix(7, p) * 3) + 1; 
             green_assigned(p) = green_counter_choice; % save the specific doctor to memory
             
             if green_counter_choice == 1 
@@ -162,38 +162,6 @@ function patient_table = precomputeAttributes(N, maxRange, random_sequence, rang
             second_service_times(p) = srv2_time;
         end
     end
-            
-    % print pre-computation summary table  
-    disp('================================================================================================================='); 
-    disp('Generated Patient Attributes Master Pre-Computation Array Matrix'); 
-    disp('================================================================================================================='); 
-    fprintf('|Pat ID|Arr Time |Triage Zone|Ser Time|Will Return?|Return Delay Time|2nd Ser Time|\n'); 
-    disp('-----------------------------------------------------------------------------------------------------------------'); 
-    
-    % temporary holders for output strings
-    triage_zones = cell(1, N); 
-    return_decisions = cell(1, N); 
-    for p = 1:N 
-        % map zone ids 
-        if triage_zones_numeric(p) == 1; 
-            triage_zones{p} = 'Red'; 
-        elseif triage_zones_numeric(p) == 2; 
-            triage_zones{p} = 'Yellow'; 
-        else
-           triage_zones{p} = 'Green';
-        end
-        
-        % map return decisions 
-        if return_decisions_numeric(p) == 1; 
-            return_decisions{p} = 'Yes'; 
-        else 
-            return_decisions{p} = 'No'; 
-        end
-    
-        fprintf('|%-5d | %-8.2f| %-10s| %-7g| %-11s| %-16g| %-11g|\n', p, arrival_times(p), triage_zones{p}, pre_service_times(p), return_decisions{p}, return_delay_times(p), second_service_times(p));
-    end 
-    disp('================================================================================================================='); 
-    disp(' '); 
     
     % output data map struct 
     % passes every data to phase 3 usage

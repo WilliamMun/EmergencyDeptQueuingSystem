@@ -16,8 +16,8 @@ function [ranges_arrival, values_arrival, ranges_triage, values_triage, ranges_s
     disp(' ');
 
     %interarrival time table 
-    values_arrival = [0, 1, 2, 3, 5, 10];
-    prob_arrival = generateRandomProbabilities(6);
+    values_arrival = [5, 7, 9, 11, 13];
+    prob_arrival = generateRandomProbabilities(5);
     [cdf_arrival, ranges_arrival] = printSimulationTable('Table 2: Interarrival Time (minutes)', 'Time', values_arrival, prob_arrival, maxRange);
     disp(' ');
 
